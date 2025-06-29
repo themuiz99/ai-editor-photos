@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>เว็บสุ่มเลขบัตรเดบิต</title>
+    <title>เว็บสุ่มและตรวจสอบเลขบัตรเดบิต</title>
     <style>
         * {
             margin: 0;
@@ -16,33 +16,91 @@
             background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
             color: #ffffff;
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             padding: 20px;
         }
 
         .container {
+            max-width: 1200px;
+            margin: 0 auto;
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
             border-radius: 20px;
-            padding: 40px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            max-width: 500px;
-            width: 100%;
+            overflow: hidden;
         }
 
-        h1 {
+        .header {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 30px;
             text-align: center;
-            margin-bottom: 30px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header h1 {
             color: #4fc3f7;
-            font-size: 2rem;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            color: #b0bec5;
+            font-size: 1.1rem;
+        }
+
+        .tabs {
+            display: flex;
+            background: rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .tab:last-child {
+            border-right: none;
+        }
+
+        .tab.active {
+            background: linear-gradient(45deg, #4fc3f7, #29b6f6);
+            color: white;
+        }
+
+        .tab:not(.active):hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .tab-content {
+            display: none;
+            padding: 40px;
+        }
+
+        .tab-content.active {
+            display: block;
         }
 
         .form-group {
             margin-bottom: 25px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 20px;
+            align-items: end;
+        }
+
+        .form-col {
+            flex: 1;
         }
 
         label {
@@ -52,7 +110,7 @@
             font-weight: 500;
         }
 
-        input[type="text"] {
+        input[type="text"], input[type="number"], select {
             width: 100%;
             padding: 15px;
             border: 2px solid rgba(255, 255, 255, 0.2);
@@ -63,14 +121,23 @@
             transition: all 0.3s ease;
         }
 
-        input[type="text"]:focus {
+        input[type="text"]:focus, input[type="number"]:focus, select:focus {
             outline: none;
             border-color: #4fc3f7;
             box-shadow: 0 0 10px rgba(79, 195, 247, 0.3);
         }
 
-        input[type="text"]::placeholder {
+        input[type="text"]::placeholder, input[type="number"]::placeholder {
             color: rgba(255, 255, 255, 0.5);
+        }
+
+        select {
+            cursor: pointer;
+        }
+
+        select option {
+            background: #1a1a2e;
+            color: #ffffff;
         }
 
         .button-group {
@@ -80,8 +147,7 @@
         }
 
         button {
-            flex: 1;
-            padding: 15px;
+            padding: 15px 30px;
             border: none;
             border-radius: 10px;
             font-size: 16px;
@@ -95,6 +161,7 @@
         .generate-btn {
             background: linear-gradient(45deg, #4fc3f7, #29b6f6);
             color: white;
+            flex: 1;
         }
 
         .generate-btn:hover {
@@ -103,46 +170,93 @@
             box-shadow: 0 5px 15px rgba(79, 195, 247, 0.4);
         }
 
-        .copy-btn {
+        .copy-all-btn {
             background: linear-gradient(45deg, #66bb6a, #4caf50);
             color: white;
         }
 
-        .copy-btn:hover {
+        .copy-all-btn:hover {
             background: linear-gradient(45deg, #4caf50, #388e3c);
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
         }
 
-        .copy-btn:disabled {
+        .copy-all-btn:disabled {
             background: #666;
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
         }
 
-        .result {
+        .validate-btn {
+            background: linear-gradient(45deg, #ff9800, #f57c00);
+            color: white;
+            flex: 1;
+        }
+
+        .validate-btn:hover {
+            background: linear-gradient(45deg, #f57c00, #e65100);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 152, 0, 0.4);
+        }
+
+        .results {
             background: rgba(0, 0, 0, 0.3);
             border-radius: 10px;
             padding: 20px;
             margin-top: 20px;
             border: 1px solid rgba(255, 255, 255, 0.1);
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .card-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .card-number {
-            font-size: 24px;
-            font-weight: bold;
-            text-align: center;
-            letter-spacing: 2px;
-            color: #4fc3f7;
-            margin-bottom: 10px;
             font-family: 'Courier New', monospace;
+            font-size: 18px;
+            font-weight: bold;
+            color: #4fc3f7;
+            letter-spacing: 1px;
         }
 
         .card-info {
-            text-align: center;
-            color: #b0bec5;
-            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .card-type {
+            background: rgba(79, 195, 247, 0.2);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .copy-btn {
+            background: linear-gradient(45deg, #66bb6a, #4caf50);
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            background: linear-gradient(45deg, #4caf50, #388e3c);
+            transform: translateY(-1px);
         }
 
         .error {
@@ -168,58 +282,166 @@
             line-height: 1.5;
         }
 
-        .card-type {
-            display: inline-block;
-            background: rgba(79, 195, 247, 0.2);
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 12px;
-            margin-top: 5px;
+        .validation-result {
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border-left: 4px solid;
         }
 
-        @media (max-width: 480px) {
+        .validation-result.valid {
+            background: rgba(76, 175, 80, 0.1);
+            border-color: #4caf50;
+        }
+
+        .validation-result.invalid {
+            background: rgba(244, 67, 54, 0.1);
+            border-color: #f44336;
+        }
+
+        .validation-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .validation-status {
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .validation-status.valid {
+            color: #4caf50;
+        }
+
+        .validation-status.invalid {
+            color: #f44336;
+        }
+
+        @media (max-width: 768px) {
             .container {
+                margin: 10px;
+            }
+            
+            .header {
                 padding: 20px;
             }
             
-            h1 {
-                font-size: 1.5rem;
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .tab {
+                border-right: none;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+            
+            .tab:last-child {
+                border-bottom: none;
+            }
+            
+            .tab-content {
+                padding: 20px;
+            }
+            
+            .form-row {
+                flex-direction: column;
             }
             
             .button-group {
                 flex-direction: column;
             }
             
-            .card-number {
-                font-size: 18px;
+            .card-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .card-info {
+                width: 100%;
+                justify-content: space-between;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🏧 เว็บสุ่มเลขบัตรเดบิต</h1>
-        
-        <div class="info">
-            <strong>วิธีใช้:</strong> กรอกเลข 6 ตัวแรกของบัตรเดบิต (BIN) แล้วกดปุ่มสุ่มเลข ระบบจะสุ่มเลขที่เหลือให้ถูกต้องตามอัลกอริทึม Luhn
+        <div class="header">
+            <h1>🏧 เว็บสุ่มและตรวจสอบเลขบัตรเดบิต</h1>
+            <p>สุ่มเลขบัตรเดบิตหลายเลขพร้อมกัน และตรวจสอบความถูกต้องตาม Luhn Algorithm</p>
         </div>
 
-        <div class="form-group">
-            <label for="binInput">เลข 6 ตัวแรกของบัตรเดบิต (BIN):</label>
-            <input type="text" id="binInput" placeholder="เช่น 424242, 555555" maxlength="6">
-            <div class="error" id="binError"></div>
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('generator')">🎲 สุ่มเลข</div>
+            <div class="tab" onclick="switchTab('validator')">✅ ตรวจสอบ</div>
         </div>
 
-        <div class="button-group">
-            <button class="generate-btn" onclick="generateCardNumber()">🎲 สุ่มเลข</button>
-            <button class="copy-btn" id="copyBtn" onclick="copyToClipboard()" disabled>📋 คัดลอก</button>
+        <!-- Tab สุ่มเลข -->
+        <div id="generator" class="tab-content active">
+            <div class="info">
+                <strong>วิธีใช้:</strong> เลือกประเภทบัตร กรอกเลข BIN (ถ้าต้องการ) และระบุจำนวนเลขที่ต้องการสุ่ม ระบบจะสุ่มเลขบัตรเดบิตที่ถูกต้องตาม Luhn Algorithm
+            </div>
+
+            <div class="form-group">
+                <div class="form-row">
+                    <div class="form-col">
+                        <label for="cardType">ประเภทบัตร:</label>
+                        <select id="cardType" onchange="updateBINPlaceholder()">
+                            <option value="random">สุ่มทุกประเภท</option>
+                            <option value="visa">Visa</option>
+                            <option value="mastercard">Mastercard</option>
+                            <option value="amex">American Express</option>
+                            <option value="discover">Discover</option>
+                            <option value="jcb">JCB</option>
+                            <option value="diners">Diners Club</option>
+                        </select>
+                    </div>
+                    <div class="form-col">
+                        <label for="binInput">เลข BIN (ถ้าต้องการระบุ):</label>
+                        <input type="text" id="binInput" placeholder="เช่น 424242" maxlength="6">
+                        <div class="error" id="binError"></div>
+                    </div>
+                    <div class="form-col">
+                        <label for="quantity">จำนวนเลข:</label>
+                        <input type="number" id="quantity" min="1" max="100" value="10">
+                    </div>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="generate-btn" onclick="generateMultipleCards()">🎲 สุ่มเลข</button>
+                <button class="copy-all-btn" id="copyAllBtn" onclick="copyAllCards()" disabled>📋 คัดลอกทั้งหมด</button>
+            </div>
+
+            <div class="results" id="generatorResults" style="display: none;">
+                <div id="cardsList"></div>
+                <div class="success" id="generatorMessage"></div>
+            </div>
         </div>
 
-        <div class="result" id="result" style="display: none;">
-            <div class="card-number" id="cardNumber"></div>
-            <div class="card-info">
-                <div id="cardType"></div>
-                <div class="success" id="successMessage"></div>
+        <!-- Tab ตรวจสอบ -->
+        <div id="validator" class="tab-content">
+            <div class="info">
+                <strong>วิธีใช้:</strong> กรอกเลขบัตรเดบิตที่ต้องการตรวจสอบ (หนึ่งเลขต่อบรรทัด) ระบบจะตรวจสอบความถูกต้องตาม Luhn Algorithm และระบุประเภทบัตร
+            </div>
+
+            <div class="form-group">
+                <label for="cardsToValidate">เลขบัตรเดบิตที่ต้องการตรวจสอบ:</label>
+                <textarea id="cardsToValidate" rows="10" style="width: 100%; padding: 15px; border: 2px solid rgba(255, 255, 255, 0.2); border-radius: 10px; background: rgba(255, 255, 255, 0.1); color: #ffffff; font-size: 16px; font-family: 'Courier New', monospace; resize: vertical;" placeholder="กรอกเลขบัตรเดบิต หนึ่งเลขต่อบรรทัด&#10;เช่น:&#10;4242424242424242&#10;5555555555554444&#10;378282246310005"></textarea>
+            </div>
+
+            <div class="button-group">
+                <button class="validate-btn" onclick="validateCards()">✅ ตรวจสอบ</button>
+            </div>
+
+            <div class="results" id="validatorResults" style="display: none;">
+                <div id="validationList"></div>
             </div>
         </div>
     </div>
@@ -240,8 +462,46 @@
             '30': 'Diners Club', '36': 'Diners Club', '38': 'Diners Club'
         };
 
+        // BIN ตัวอย่างสำหรับแต่ละประเภทบัตร
+        const sampleBINs = {
+            visa: ['424242', '411111', '401288', '483312'],
+            mastercard: ['555555', '515555', '222100', '234567'],
+            amex: ['378282', '371449', '343434', '340000'],
+            discover: ['601111', '622126', '644444', '650000'],
+            jcb: ['353535', '356600', '358000', '359900'],
+            diners: ['300000', '305555', '360000', '380000']
+        };
+
+        let generatedCards = [];
+
+        function switchTab(tabName) {
+            // ซ่อน tab ทั้งหมด
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // ซ่อน tab button ทั้งหมด
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // แสดง tab ที่เลือก
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function updateBINPlaceholder() {
+            const cardType = document.getElementById('cardType').value;
+            const binInput = document.getElementById('binInput');
+            
+            if (cardType === 'random') {
+                binInput.placeholder = 'เช่น 424242, 555555';
+            } else if (sampleBINs[cardType]) {
+                binInput.placeholder = `เช่น ${sampleBINs[cardType].join(', ')}`;
+            }
+        }
+
         function getCardType(bin) {
-            // ตรวจสอบจากยาวที่สุดไปสั้นที่สุด
             const sortedKeys = Object.keys(cardTypes).sort((a, b) => b.length - a.length);
             
             for (let key of sortedKeys) {
@@ -252,11 +512,15 @@
             return 'Unknown';
         }
 
-        function validateBIN(bin) {
-            if (!/^\d{6}$/.test(bin)) {
-                return 'กรุณากรอกตัวเลข 6 หลักเท่านั้น';
+        function getRandomBIN(cardType) {
+            if (cardType === 'random') {
+                const allBINs = Object.values(sampleBINs).flat();
+                return allBINs[Math.floor(Math.random() * allBINs.length)];
+            } else if (sampleBINs[cardType]) {
+                const bins = sampleBINs[cardType];
+                return bins[Math.floor(Math.random() * bins.length)];
             }
-            return null;
+            return '424242'; // fallback
         }
 
         function generateRandomDigits(length) {
@@ -271,7 +535,6 @@
             let sum = 0;
             let isEven = false;
             
-            // วนลูปจากขวาไปซ้าย (ไม่รวม check digit)
             for (let i = cardNumber.length - 1; i >= 0; i--) {
                 let digit = parseInt(cardNumber[i]);
                 
@@ -293,7 +556,6 @@
             let sum = 0;
             let isEven = false;
             
-            // วนลูปจากขวาไปซ้าย
             for (let i = cardNumber.length - 1; i >= 0; i--) {
                 let digit = parseInt(cardNumber[i]);
                 
@@ -315,26 +577,9 @@
             return cardNumber.replace(/(.{4})/g, '$1 ').trim();
         }
 
-        function generateCardNumber() {
-            const binInput = document.getElementById('binInput');
-            const binError = document.getElementById('binError');
-            const result = document.getElementById('result');
-            const cardNumber = document.getElementById('cardNumber');
-            const cardType = document.getElementById('cardType');
-            const successMessage = document.getElementById('successMessage');
-            const copyBtn = document.getElementById('copyBtn');
-            
-            // ล้างข้อความแสดงข้อผิดพลาด
-            binError.textContent = '';
-            
-            const bin = binInput.value.trim();
-            const error = validateBIN(bin);
-            
-            if (error) {
-                binError.textContent = error;
-                result.style.display = 'none';
-                copyBtn.disabled = true;
-                return;
+        function generateSingleCard(bin = null, cardType = 'random') {
+            if (!bin) {
+                bin = getRandomBIN(cardType);
             }
             
             // สุ่มเลข 9 หลัก (16 หลักรวม - 6 หลัก BIN - 1 หลัก check digit)
@@ -345,41 +590,155 @@
             const checkDigit = calculateLuhnCheckDigit(cardWithoutCheckDigit);
             const fullCardNumber = cardWithoutCheckDigit + checkDigit;
             
-            // แสดงผลลัพธ์
-            const type = getCardType(bin);
-            cardNumber.textContent = formatCardNumber(fullCardNumber);
-            cardType.innerHTML = `<span class="card-type">${type}</span>`;
-            successMessage.textContent = `✅ เลขบัตรถูกต้องตามอัลกอริทึม Luhn`;
-            
-            result.style.display = 'block';
-            copyBtn.disabled = false;
-            
-            // เก็บเลขบัตรไว้สำหรับคัดลอก
-            window.generatedCardNumber = fullCardNumber;
+            return {
+                number: fullCardNumber,
+                formatted: formatCardNumber(fullCardNumber),
+                type: getCardType(bin)
+            };
         }
 
-        function copyToClipboard() {
-            if (window.generatedCardNumber) {
-                navigator.clipboard.writeText(window.generatedCardNumber).then(() => {
-                    const successMessage = document.getElementById('successMessage');
-                    const originalText = successMessage.textContent;
-                    successMessage.textContent = '📋 คัดลอกเลขบัตรแล้ว!';
-                    successMessage.style.color = '#4caf50';
-                    
-                    setTimeout(() => {
-                        successMessage.textContent = originalText;
-                        successMessage.style.color = '#4caf50';
-                    }, 2000);
-                }).catch(() => {
-                    alert('ไม่สามารถคัดลอกได้ กรุณาคัดลอกด้วยตนเอง');
-                });
+        function generateMultipleCards() {
+            const binInput = document.getElementById('binInput');
+            const cardType = document.getElementById('cardType').value;
+            const quantity = parseInt(document.getElementById('quantity').value) || 10;
+            const binError = document.getElementById('binError');
+            const results = document.getElementById('generatorResults');
+            const cardsList = document.getElementById('cardsList');
+            const message = document.getElementById('generatorMessage');
+            const copyAllBtn = document.getElementById('copyAllBtn');
+            
+            // ล้างข้อความแสดงข้อผิดพลาด
+            binError.textContent = '';
+            
+            const customBin = binInput.value.trim();
+            
+            // ตรวจสอบ BIN ที่กรอก (ถ้ามี)
+            if (customBin && (!/^\d{6}$/.test(customBin))) {
+                binError.textContent = 'กรุณากรอกตัวเลข 6 หลักเท่านั้น';
+                return;
             }
+            
+            // ตรวจสอบจำนวน
+            if (quantity < 1 || quantity > 100) {
+                alert('กรุณาระบุจำนวนระหว่าง 1-100');
+                return;
+            }
+            
+            // สุ่มเลขบัตร
+            generatedCards = [];
+            for (let i = 0; i < quantity; i++) {
+                const card = generateSingleCard(customBin, cardType);
+                generatedCards.push(card);
+            }
+            
+            // แสดงผลลัพธ์
+            cardsList.innerHTML = '';
+            generatedCards.forEach((card, index) => {
+                const cardItem = document.createElement('div');
+                cardItem.className = 'card-item';
+                cardItem.innerHTML = `
+                    <div class="card-number">${card.formatted}</div>
+                    <div class="card-info">
+                        <span class="card-type">${card.type}</span>
+                        <button class="copy-btn" onclick="copyCard('${card.number}', ${index})">คัดลอก</button>
+                    </div>
+                `;
+                cardsList.appendChild(cardItem);
+            });
+            
+            message.textContent = `✅ สุ่มเลขบัตรเดบิต ${quantity} เลขเรียบร้อย`;
+            results.style.display = 'block';
+            copyAllBtn.disabled = false;
+        }
+
+        function copyCard(cardNumber, index) {
+            navigator.clipboard.writeText(cardNumber).then(() => {
+                const buttons = document.querySelectorAll('.copy-btn');
+                const originalText = buttons[index].textContent;
+                buttons[index].textContent = 'คัดลอกแล้ว!';
+                buttons[index].style.background = 'linear-gradient(45deg, #4caf50, #388e3c)';
+                
+                setTimeout(() => {
+                    buttons[index].textContent = originalText;
+                    buttons[index].style.background = 'linear-gradient(45deg, #66bb6a, #4caf50)';
+                }, 2000);
+            }).catch(() => {
+                alert('ไม่สามารถคัดลอกได้ กรุณาคัดลอกด้วยตนเอง');
+            });
+        }
+
+        function copyAllCards() {
+            const allNumbers = generatedCards.map(card => card.number).join('\n');
+            navigator.clipboard.writeText(allNumbers).then(() => {
+                const copyAllBtn = document.getElementById('copyAllBtn');
+                const originalText = copyAllBtn.textContent;
+                copyAllBtn.textContent = '📋 คัดลอกทั้งหมดแล้ว!';
+                copyAllBtn.style.background = 'linear-gradient(45deg, #4caf50, #388e3c)';
+                
+                setTimeout(() => {
+                    copyAllBtn.textContent = originalText;
+                    copyAllBtn.style.background = 'linear-gradient(45deg, #66bb6a, #4caf50)';
+                }, 2000);
+            }).catch(() => {
+                alert('ไม่สามารถคัดลอกได้ กรุณาคัดลอกด้วยตนเอง');
+            });
+        }
+
+        function validateCards() {
+            const cardsInput = document.getElementById('cardsToValidate').value.trim();
+            const results = document.getElementById('validatorResults');
+            const validationList = document.getElementById('validationList');
+            
+            if (!cardsInput) {
+                alert('กรุณากรอกเลขบัตรเดบิตที่ต้องการตรวจสอบ');
+                return;
+            }
+            
+            const cardNumbers = cardsInput.split('\n').map(card => card.trim().replace(/\s/g, '')).filter(card => card);
+            
+            if (cardNumbers.length === 0) {
+                alert('ไม่พบเลขบัตรเดบิตที่ถูกต้อง');
+                return;
+            }
+            
+            validationList.innerHTML = '';
+            
+            cardNumbers.forEach(cardNumber => {
+                const isValid = validateLuhn(cardNumber);
+                const cardType = getCardType(cardNumber);
+                
+                const validationItem = document.createElement('div');
+                validationItem.className = `validation-result ${isValid ? 'valid' : 'invalid'}`;
+                
+                validationItem.innerHTML = `
+                    <div class="validation-details">
+                        <div class="card-number">${formatCardNumber(cardNumber)}</div>
+                        <div class="validation-status ${isValid ? 'valid' : 'invalid'}">
+                            ${isValid ? '✅ ถูกต้อง' : '❌ ไม่ถูกต้อง'}
+                        </div>
+                    </div>
+                    <div style="font-size: 14px; color: #b0bec5;">
+                        ประเภทบัตร: <span class="card-type">${cardType}</span>
+                        ${isValid ? ' | ผ่านการตรวจสอบ Luhn Algorithm' : ' | ไม่ผ่านการตรวจสอบ Luhn Algorithm'}
+                    </div>
+                `;
+                
+                validationList.appendChild(validationItem);
+            });
+            
+            results.style.display = 'block';
         }
 
         // เพิ่ม event listener สำหรับ Enter key
         document.getElementById('binInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
-                generateCardNumber();
+                generateMultipleCards();
+            }
+        });
+
+        document.getElementById('quantity').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                generateMultipleCards();
             }
         });
 
@@ -387,6 +746,9 @@
         document.getElementById('binInput').addEventListener('input', function(e) {
             this.value = this.value.replace(/[^0-9]/g, '');
         });
+
+        // เริ่มต้นด้วยการอัปเดต placeholder
+        updateBINPlaceholder();
     </script>
 </body>
 </html>
